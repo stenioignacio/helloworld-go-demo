@@ -40,30 +40,34 @@ jobs:
             push: true
             tags: stenioignacio/go-argocd:pr-${{env.image_version}}
             
-    # deploy_prod:
-    #       name: Deploys to prod environment
-    #       runs-on: ubuntu-latest
-    #       environment: prod
-    #       needs: [push_to_registry]
-    #       steps:
+    deploy_prod:
+          name: Deploys to prod environment
+          runs-on: ubuntu-latest
+          environment: prod
+          needs: [push_to_registry]
+          steps:
   
-    #       - name: Checkout the other repository
-    #         uses: actions/checkout@v2
-    #         with:
-    #           repository: 'stenioignacio/go-docker-template-argocd' # replace with your repository
-    #           token: ${{ secrets.PAT }} # use the PAT you saved as a secret
-    #           path: 'go-docker-template-argocd' # this is the directory where the other repo will be checked out
+          - name: Checkout the other repository
+            uses: actions/checkout@v2
+            with:
+              repository: 'stenioignacio/go-docker-template-argocd' # replace with your repository
+              token: ${{ secrets.PAT }} # use the PAT you saved as a secret
+              path: 'go-docker-template-argocd' # this is the directory where the other repo will be checked out
               
-    #       - name: Run sed on the other repository
-    #         env:
-    #           IMAGE_TAG: ${{ needs.push_to_registry.outputs.TAG }}
-    #         run: |
-    #           sed -i "/^ *image:/s|.*|  image: stenioignacio/go-argocd:$IMAGE_TAG|" ./go-docker-template-argocd/prd/helloworld-docker/helm/values.yaml
-    #       - name: Commit and push changes
-    #         run: |
-    #           cd go-docker-template-argocd
-    #           git config --local user.email "action@github.com"
-    #           git config --local user.name "GitHub Action"
-    #           git add .
-    #           git commit -am "Update version of helloworld-go image in prd"
-    #           git push
+          - name: Run sed on the other repository
+            env:
+              IMAGE_TAG: ${{ needs.push_to_registry.outputs.TAG }}
+            run: |
+              sed -i "/^ *image:/s|.*|  image: stenioignacio/go-argocd:pr-$IMAGE_TAG|" ./go-docker-template-argocd/prd/helloworld-docker/helm/values.yaml
+          
+          - name: Commit and push changes
+            run: |
+              cd go-docker-template-argocd
+              git config --local user.email "action@github.com"
+              git config --local user.name "GitHub Action"
+              git add .
+              git commit -am "Update version of helloworld-go image in prd"
+              git push
+              gh pr create -B main -H "feat/pr-$IMAGE_TAG" --title "Merge PR $IMAGE_TAG" --body "This PR updates the image version to $IMAGE_TAG"
+            env:
+              GITHUB_TOKEN: ${{ secrets.PAT }} 
