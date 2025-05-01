@@ -1,6 +1,9 @@
 name: Create temporary env with argo
 
 on:
+  push:
+    branches:
+      - feat/test_pr
   pull_request:
       branches:
         - main
