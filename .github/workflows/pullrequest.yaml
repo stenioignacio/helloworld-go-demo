@@ -67,10 +67,11 @@ jobs:
               cd go-docker-template-argocd
               git config --local user.email "action@github.com"
               git config --local user.name "GitHub Action"
-              git checkout -b "feat/pr-$IMAGE_TAG"
+              git checkout  -b "feat/pr-$IMAGE_TAG"
               git add .
               git commit -am "Update version of helloworld-go image in prd"
-              git push
+              git push --set-upstream origin "feat/pr-$IMAGE_TAG"
               gh pr create -B main -H "feat/pr-$IMAGE_TAG" --title "Merge PR $IMAGE_TAG" --body "This PR updates the image version to $IMAGE_TAG"
             env:
+              IMAGE_TAG: ${{ needs.push_to_registry.outputs.TAG }}
               GITHUB_TOKEN: ${{ secrets.PAT }} 
