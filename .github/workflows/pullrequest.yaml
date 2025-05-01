@@ -1,8 +1,9 @@
 name: Create temporary env with argo
 
 on:
-    push:
-      branches: [ main ]
+  pull_request:
+      branches:
+        - main
   
 jobs:
 
@@ -12,6 +13,7 @@ jobs:
       runs-on: ubuntu-latest
       outputs:
         TAG: ${{ steps.vars.outputs.TAG }}
+      
       steps:
         - name: Check out the repo
           uses: actions/checkout@v2
@@ -65,6 +67,7 @@ jobs:
               cd go-docker-template-argocd
               git config --local user.email "action@github.com"
               git config --local user.name "GitHub Action"
+              git checkout -b "feat/pr-$IMAGE_TAG"
               git add .
               git commit -am "Update version of helloworld-go image in prd"
               git push
